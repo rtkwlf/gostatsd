@@ -11,7 +11,7 @@ import (
 )
 
 // FakeMetric is a fake metric.
-var FakeMetric = []byte("foo.bar.baz:2|c")
+var FakeMetric = []byte("foo.bar.baz:2|c\nfoo.bar.baz:2|c\nfoo.bar.baz:2|c\nfoo.bar.baz:2|c")
 
 // FakeAddr is a fake net.Addr
 type FakeAddr struct{}
