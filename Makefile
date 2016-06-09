@@ -9,6 +9,7 @@ BINARY_NAME := gostatsd
 IMAGE_NAME := atlassianlabs/$(BINARY_NAME)
 ARCH ?= darwin
 METALINTER_CONCURRENCY ?= 4
+GOVERSION = 1.6.2
 
 setup: setup-ci
 	go get -v -u github.com/githubnemo/CompileDaemon
@@ -84,10 +85,19 @@ git-hook:
 	cp dev/push-hook.sh .git/hooks/pre-push
 
 cross:
-	CGO_ENABLED=0 GOOS=linux go build -o build/bin/linux/$(BINARY_NAME) $(GOBUILD_VERSION_ARGS) -a -installsuffix cgo  github.com/atlassian/$(BINARY_NAME)
+	CGO_ENABLED=0 GOOS=linux go build -o build/bin/linux/$(BINARY_NAME) $(GOBUILD_VERSION_ARGS) -a -installsuffix cgo  github.com/atlassian/gostatsd
+
+docker-cross:
+	docker run \
+		--rm \
+		-v "$(GOPATH)":/opt/gopath \
+		-w /opt/gopath/src/github.com/atlassian/gostatsd \
+		-e GOPATH=/opt/gopath \
+		golang:$(GOVERSION) \
+		go build -o build/bin/linux/$(BINARY_NAME) $(GOBUILD_VERSION_ARGS) -a -installsuffix cgo github.com/atlassian/gostatsd
 
 docker: cross
-	cd build && docker build -t $(IMAGE_NAME):$(GIT_HASH) .
+	cd build && docker build --pull -t $(IMAGE_NAME):$(GIT_HASH) .
 
 release-hash: check test docker
 	docker push $(IMAGE_NAME):$(GIT_HASH)
